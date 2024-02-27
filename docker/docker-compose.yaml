@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16.2
+    restart: no
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rinha
+    networks:
+      - postgres
+    volumes:
+      - ./config/postgres-init.sql:/docker-entrypoint-initdb.d/script.sql
+
+  dbAdmin:
+    image: dpage/pgadmin4:latest
+    restart: no
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
