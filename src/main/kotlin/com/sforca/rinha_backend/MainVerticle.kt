@@ -10,7 +10,7 @@ class MainVerticle : AbstractVerticle() {
     vertx
       .createHttpServer()
       .requestHandler(restApi)
-      .listen(9999) { http ->
+      .listen(8080) { http ->
         if (http.succeeded()) {
           startPromise.complete()
           println("HTTP server started on port 9999")
