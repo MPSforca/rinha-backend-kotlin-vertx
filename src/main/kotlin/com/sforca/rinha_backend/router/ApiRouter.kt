@@ -11,12 +11,10 @@ import com.sforca.rinha_backend.router.exception.InvalidLongException
 import com.sforca.rinha_backend.router.exception.InvalidTransactionTypeException
 import com.sforca.rinha_backend.router.exception.NullFieldException
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
-import java.lang.RuntimeException
 
 val restApi: Router = Router.router(Vertx.vertx())
 

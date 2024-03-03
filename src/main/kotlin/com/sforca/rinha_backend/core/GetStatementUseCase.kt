@@ -13,7 +13,7 @@ class GetStatementUseCase {
 
   operator fun invoke(clientId: Long): Future<GetStatementOutput> =
     Future.all(
-      clientsRepository.getBalanceForUpdate(clientId),
+      clientsRepository.getBalance(clientId),
       clientsRepository.getLastTransactions(clientId, 10)
     ).map {
       val balance: Balance = it.resultAt(0)

@@ -11,6 +11,8 @@ interface ClientsRepository {
 
   fun getBalanceForUpdate(clientId: Long, client: SqlClient = pool): Future<Balance>
 
+  fun getBalance(clientId: Long, client: SqlClient = pool): Future<Balance>
+
   fun updateBalance(clientId: Long, newBalance: Long, client: SqlClient = pool): Future<Balance>
 
   fun saveTransaction(transaction: Transaction, client: SqlClient = pool): Future<Unit>

@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS transactions(
         ON DELETE CASCADE
   );
 
+CREATE INDEX transactions_carried_out_index ON transactions ( client_id, carried_out_at desc );
+
 DO $$
 BEGIN
 INSERT INTO statements(client_id, balance_limit, current_balance)

@@ -13,7 +13,7 @@ class MainVerticle : AbstractVerticle() {
       .listen(8080) { http ->
         if (http.succeeded()) {
           startPromise.complete()
-          println("HTTP server started on port 9999")
+          println("HTTP server started on port 8080")
         } else {
           startPromise.fail(http.cause());
         }
