@@ -28,26 +28,28 @@ class SaveTransactionUseCase(private val cache: StatementCache) {
                         .flatMap { currentBalance ->
                             val newBalance =
                                 calculateNewBalance(newTransaction.type, currentBalance.value, newTransaction.value)
-                            Future.all(
-                                clientsRepository.saveTransaction(
-                                    transaction = Transaction(
-                                        clientId = newTransaction.clientId,
-                                        value = newTransaction.value,
-                                        type = newTransaction.type,
-                                        description = newTransaction.description,
-                                        carriedOutAt = LocalDateTime.now()
-                                    ),
-                                    client = conn
+                            clientsRepository.saveTransaction(
+                                transaction = Transaction(
+                                    clientId = newTransaction.clientId,
+                                    value = newTransaction.value,
+                                    type = newTransaction.type,
+                                    description = newTransaction.description,
+                                    carriedOutAt = LocalDateTime.now()
                                 ),
-                                clientsRepository.updateBalance(newTransaction.clientId, newBalance, client = conn)
-                            )
+                                newClientBalance = newBalance,
+                                client = conn
+                            ).map {
+                                Balance(
+                                    value = newBalance,
+                                    limit = currentBalance.limit
+                                )
+                            }
                         }
                         .onSuccess { tx.commit() }
                         .map {
-                            val balance: Balance = it.resultAt(1)
                             return@map SaveTransactionOutput(
-                                limit = balance.limit,
-                                value = balance.value
+                                limit = it.limit,
+                                value = it.value
                             )
                         }
                         .eventually { v -> conn.close() }

@@ -1,9 +1,11 @@
+-- Statements table
 CREATE TABLE IF NOT EXISTS statements(
     client_id serial PRIMARY KEY,
     balance_limit BIGINT NOT NULL,
     current_balance BIGINT NOT NULL
 );
 
+-- Transactions table
 CREATE TABLE IF NOT EXISTS transactions(
     id SERIAL PRIMARY KEY,
     client_id serial NOT NULL,
@@ -19,6 +21,30 @@ CREATE TABLE IF NOT EXISTS transactions(
 
 CREATE INDEX transactions_carried_out_index ON transactions ( client_id, carried_out_at desc );
 
+-- Save Transaction Stored Procedure
+CREATE OR REPLACE PROCEDURE save_transaction(
+	t_client_id bigint,
+	new_client_balance bigint,
+	t_value bigint,
+	t_type varchar(1),
+	t_description varchar(10),
+	t_carried_out_at timestamp
+)
+LANGUAGE plpgsql AS
+$$
+BEGIN
+    -- adding to transactions table
+    INSERT INTO transactions(client_id, value, type, description, carried_out_at)
+    VALUES (t_client_id, t_value, t_type, t_description, t_carried_out_at);
+
+    -- updating client balance
+    UPDATE statements
+    SET current_balance = new_client_balance
+    WHERE client_id = t_client_id;
+END;
+$$;
+
+-- Insert initial data
 DO $$
 BEGIN
 INSERT INTO statements(client_id, balance_limit, current_balance)

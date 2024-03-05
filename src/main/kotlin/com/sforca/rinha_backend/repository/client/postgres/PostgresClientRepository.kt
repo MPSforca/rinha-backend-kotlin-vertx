@@ -74,33 +74,13 @@ class PostgresClientRepository : ClientsRepository {
             .onFailure { println("Couldn't get the balance from repository. Cause: ${it.cause}") }
 
 
-    override fun updateBalance(clientId: Long, newBalance: Long, client: SqlClient): Future<Balance> =
+    override fun saveTransaction(transaction: Transaction, newClientBalance: Long, client: SqlClient): Future<Unit> =
         client
-            .preparedQuery(
-                """
-        UPDATE statements SET current_balance = $1 WHERE client_id = $2 RETURNING balance_limit, current_balance
-        """.trimIndent()
-            )
-            .execute(Tuple.of(newBalance, clientId))
-            .map {
-                val row = it.first()
-                return@map Balance(
-                    value = row.getLong("current_balance"),
-                    limit = row.getLong("balance_limit")
-                )
-            }
-            .onFailure { println("Failed to update the balance of user $clientId. Cause: ${it.message}") }
-
-    override fun saveTransaction(transaction: Transaction, client: SqlClient): Future<Unit> =
-        client
-            .preparedQuery(
-                """
-        INSERT INTO transactions(client_id, value, type, description, carried_out_at) VALUES ($1, $2, $3, $4, $5)
-        """.trimIndent()
-            )
+            .preparedQuery("CALL save_transaction($1, $2, $3, $4, $5, $6)")
             .execute(
                 Tuple.of(
                     transaction.clientId,
+                    newClientBalance,
                     transaction.value,
                     transaction.type.toString(),
                     transaction.description,
