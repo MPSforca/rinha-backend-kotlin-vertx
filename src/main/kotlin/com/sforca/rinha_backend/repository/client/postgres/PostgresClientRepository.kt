@@ -10,16 +10,15 @@ import io.vertx.sqlclient.Tuple
 
 class PostgresClientRepository : ClientsRepository {
 
-    override fun getLastTransactions(clientId: Long, limit: Int): Future<List<Transaction>> =
-        pool
-            .preparedQuery(
-                """
-        SELECT value, type, description, carried_out_at FROM transactions
-        WHERE client_id = $1
-        ORDER BY carried_out_at DESC
-        LIMIT $2
-      """.trimIndent()
-            )
+    override fun getLastTransactions(clientId: Long, limit: Int, client: SqlClient): Future<List<Transaction>> =
+        client.preparedQuery(
+            """
+                SELECT value, type, description, carried_out_at FROM transactions
+                WHERE client_id = $1
+                ORDER BY carried_out_at DESC
+                LIMIT $2
+          """.trimIndent()
+        )
             .execute(Tuple.of(clientId, limit))
             .map {
                 it.map {

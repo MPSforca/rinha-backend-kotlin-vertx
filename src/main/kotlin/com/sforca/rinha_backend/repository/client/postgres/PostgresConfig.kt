@@ -6,10 +6,9 @@ import io.vertx.pgclient.PgConnectOptions
 import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.PoolOptions
 
-// TODO use env
 private val connectionOptions: PgConnectOptions = PgConnectOptions()
   .setPort(5432)
-  .setHost("db")
+  .setHost(System.getenv("DB_HOST") ?: "localhost")
   .setDatabase("rinha")
   .setUser("admin")
   .setPassword("password")

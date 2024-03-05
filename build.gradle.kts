@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.jetbrains.kotlin.cli.jvm.main
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -34,10 +35,14 @@ dependencies {
 
   // Web
   implementation("io.vertx:vertx-web")
+  implementation("io.vertx:vertx-web-validation")
 
   // Postgres
   implementation("com.ongres.scram:client:2.1")
   implementation("io.vertx:vertx-pg-client")
+
+  // Cache
+  implementation("io.vertx:vertx-redis-client")
 
   implementation(kotlin("stdlib-jdk8"))
   testImplementation("io.vertx:vertx-junit5")

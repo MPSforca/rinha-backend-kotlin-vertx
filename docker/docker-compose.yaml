@@ -25,6 +25,9 @@ services:
       - "8081:8080"
     depends_on:
       - db
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
     deploy:
       resources:
         limits:
@@ -55,6 +58,13 @@ services:
         limits:
           cpus: "0.2"
           memory: "18MB"
+
+  redis:
+    image: redis:7.2.4
+    restart: no
+    ports:
+      - "6379:6379"
+    command: redis-server --loglevel warning --requirepass password
 
   dbAdmin:
     image: dpage/pgadmin4:latest
