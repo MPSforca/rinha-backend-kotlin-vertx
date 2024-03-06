@@ -108,6 +108,5 @@ class PostgresClientRepository : ClientsRepository {
                 )
             )
             .map { }
-            .onSuccess { println("Transaction successfully saved!") }
             .onFailure { println("Failed to save the transaction. Cause: ${it.message}") }
 }

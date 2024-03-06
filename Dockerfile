@@ -7,4 +7,4 @@ FROM azul/zulu-openjdk:21.0.2-jre
 EXPOSE 8080
 RUN mkdir /app
 COPY --from=build /project/build/libs/*-fat.jar /app/rinha.jar
-ENTRYPOINT ["java", "-Xms100m", "-Xmx230m", "-jar", "/app/rinha.jar"]
+ENTRYPOINT ["java", "-Xms32m", "-Xmx32m", "-XX:+AlwaysPreTouch", "-jar", "/app/rinha.jar"]

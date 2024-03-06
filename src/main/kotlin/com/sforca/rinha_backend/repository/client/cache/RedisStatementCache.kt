@@ -9,10 +9,16 @@ import com.sforca.rinha_backend.repository.client.Transaction
 import io.vertx.core.Future
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.redis.client.RedisAPI
+import io.vertx.sqlclient.SqlClient
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class RedisStatementCache(private val clientsRepository: ClientsRepository) : StatementCache {
+class RedisStatementCache(
+    private val clientsRepository: ClientsRepository,
+    private val redisApi: RedisAPI,
+    private val client: SqlClient
+) : StatementCache {
 
     private val localDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
@@ -21,15 +27,11 @@ class RedisStatementCache(private val clientsRepository: ClientsRepository) : St
             .flatMap { response ->
                 return@flatMap response?.toString()?.toGetStatementOutput()?.let { Future.succeededFuture(it) }
                     ?: run {
-                        println("Failed to hit cache. Fetching from db...")
                         statementFromRepository(clientId)
                             .onSuccess {
                                 redisApi.set(listOf(clientId.toString(), it.toJson()))
                             }
                     }
-            }
-            .onFailure {
-                println("Failed to connect to redis: ${it.message}")
             }
 
 
@@ -76,8 +78,8 @@ class RedisStatementCache(private val clientsRepository: ClientsRepository) : St
     }
 
     private fun statementFromRepository(clientId: Long): Future<GetStatementOutput> = Future.all(
-        clientsRepository.getBalance(clientId),
-        clientsRepository.getLastTransactions(clientId, 10)
+        clientsRepository.getBalance(clientId, client),
+        clientsRepository.getLastTransactions(clientId, 10, client)
     ).map {
         val balance: Balance = it.resultAt(0)
         val transactions: List<Transaction> = it.resultAt(1)

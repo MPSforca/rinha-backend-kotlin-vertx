@@ -6,12 +6,15 @@ import com.sforca.rinha_backend.core.output.SaveTransactionOutput
 import com.sforca.rinha_backend.repository.client.Balance
 import com.sforca.rinha_backend.repository.client.Transaction
 import com.sforca.rinha_backend.repository.client.cache.StatementCache
-import com.sforca.rinha_backend.repository.client.postgres.pool
 import com.sforca.rinha_backend.repository.clientsRepository
 import io.vertx.core.Future
+import io.vertx.sqlclient.Pool
 import java.time.LocalDateTime
 
-class SaveTransactionUseCase(private val cache: StatementCache) {
+class SaveTransactionUseCase(
+    private val cache: StatementCache,
+    private val pool: Pool,
+) {
 
     operator fun invoke(newTransaction: SaveTransactionInput): Future<SaveTransactionOutput> = pool.connection
         .flatMap { conn ->
