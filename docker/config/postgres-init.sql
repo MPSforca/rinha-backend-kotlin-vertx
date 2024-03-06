@@ -1,20 +1,16 @@
 CREATE TABLE IF NOT EXISTS statements(
-    client_id serial PRIMARY KEY,
+    client_id BIGINT PRIMARY KEY,
     balance_limit BIGINT NOT NULL,
     current_balance BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transactions(
-    id SERIAL PRIMARY KEY,
-    client_id serial NOT NULL,
+    client_id BIGINT NOT NULL,
     value BIGINT NOT NULL,
     type CHAR NOT NULL,
     description VARCHAR(10) NOT NULL,
     carried_out_at timestamp NOT NULL,
-    CONSTRAINT fk_client_id
-        FOREIGN KEY (client_id)
-        REFERENCES statements(client_id)
-        ON DELETE CASCADE
+    PRIMARY KEY (client_id, carried_out_at)
   );
 
 CREATE INDEX transactions_carried_out_index ON transactions ( client_id, carried_out_at desc );

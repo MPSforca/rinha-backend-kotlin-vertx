@@ -65,20 +65,3 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --loglevel warning --requirepass password
-
-  dbAdmin:
-    image: dpage/pgadmin4:latest
-    restart: no
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-
-  prometheus:
-    image: prom/prometheus:latest
-    restart: no
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml

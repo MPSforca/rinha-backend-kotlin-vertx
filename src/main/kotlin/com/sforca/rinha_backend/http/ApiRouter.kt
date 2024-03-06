@@ -13,9 +13,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.validation.BodyProcessorException
-import io.vertx.ext.web.validation.BodyProcessorException.BodyProcessorErrorType
 import io.vertx.json.schema.ValidationException
-import io.vertx.micrometer.PrometheusScrapingHandler
 
 class ApiRouter(
     private val vertx: Vertx,
@@ -32,7 +30,6 @@ class ApiRouter(
     fun router(): Router = Router.router(vertx).also {
         it.mapSaveTransactionEndpoint()
         it.mapGetStatementEndpoint()
-        it.route("/metrics").handler(PrometheusScrapingHandler.create());
     }
 
     private fun Router.mapSaveTransactionEndpoint() {
