@@ -11,25 +11,10 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Promise
 import io.vertx.pgclient.PgBuilder
 import io.vertx.pgclient.PgConnectOptions
-import io.vertx.redis.client.Redis
-import io.vertx.redis.client.RedisAPI
-import io.vertx.redis.client.RedisOptions
 import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.PoolOptions
 
 class MainVerticle : AbstractVerticle() {
-    private val redisHost = System.getenv("REDIS_HOST") ?: "localhost"
-
-    private val redis: Redis by lazy {
-        Redis.createClient(
-            vertx,
-            RedisOptions()
-                .addConnectionString("redis://:password@$redisHost:6379")
-                .setMaxPoolSize(6)
-                .setMaxPoolWaiting(16),
-        )
-    }
-
     private val connectionOptions: PgConnectOptions =
         PgConnectOptions()
             .setPort(5432)
@@ -52,10 +37,8 @@ class MainVerticle : AbstractVerticle() {
     }
 
     override fun start(startPromise: Promise<Void>) {
-        val redisApi: RedisAPI = RedisAPI.api(redis)
-
         val clientsRepository: ClientsRepository = PostgresClientRepository()
-        val statementCache: StatementCache = RedisStatementCache(clientsRepository, redisApi, pool)
+        val statementCache: StatementCache = RedisStatementCache(clientsRepository, pool)
         val saveTransactionUseCase = SaveTransactionUseCase(statementCache, pool)
         val getStatementUseCase = GetStatementUseCase(statementCache)
         val apiRouter = ApiRouter(vertx, saveTransactionUseCase, getStatementUseCase).router()

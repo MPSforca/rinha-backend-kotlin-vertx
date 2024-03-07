@@ -32,7 +32,7 @@ services:
       resources:
         limits:
           cpus: "0.45"
-          memory: "226MB"
+          memory: "223MB"
 
   api02:
     <<: *api
@@ -42,7 +42,7 @@ services:
       resources:
         limits:
           cpus: "0.45"
-          memory: "226MB"
+          memory: "223MB"
 
   nginx:
     image: nginx:latest
@@ -57,11 +57,4 @@ services:
       resources:
         limits:
           cpus: "0.2"
-          memory: "18MB"
-
-  redis:
-    image: redis:7.2.4
-    restart: no
-    ports:
-      - "6379:6379"
-    command: redis-server --loglevel warning --requirepass password
+          memory: "14MB"
