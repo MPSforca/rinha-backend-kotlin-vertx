@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS transactions(
     description VARCHAR(10) NOT NULL,
     carried_out_at timestamp NOT NULL,
     PRIMARY KEY (client_id, carried_out_at)
-  );
+);
 
 CREATE INDEX transactions_carried_out_index ON transactions ( client_id, carried_out_at desc );
 
