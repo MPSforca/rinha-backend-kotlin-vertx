@@ -7,6 +7,8 @@ import com.sforca.rinha.http.CONTENT_TYPE_HEADER
 import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
+import io.vertx.kotlin.core.json.json
+import io.vertx.kotlin.core.json.obj
 
 class StatementHandler(
     private val getStatement: GetStatementUseCase,
@@ -22,25 +24,26 @@ class StatementHandler(
     ) = rc.response()
         .setStatusCode(200)
         .putHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
-        .end(
-            JsonObject()
-                .put(
-                    "saldo",
-                    JsonObject()
-                        .put("total", output.balance.value)
-                        .put("data_extrato", output.checkDate.toString())
-                        .put("limite", output.balance.limit),
-                )
-                .put(
-                    "ultimas_transacoes",
-                    output.lastTransactions.map { transaction ->
-                        JsonObject()
-                            .put("valor", transaction.value)
-                            .put("tipo", transaction.type.toString())
-                            .put("descricao", transaction.description)
-                            .put("realizada_em", transaction.carriedOutAt.toString())
+        .end(output.toJson().encode())
+
+    private fun GetStatementOutput.toJson(): JsonObject =
+        json {
+            obj(
+                "saldo" to
+                    obj(
+                        "total" to balance.value,
+                        "data_extrato" to checkDate.toString(),
+                        "limite" to balance.limit,
+                    ),
+                "ultimas_transacoes" to
+                    lastTransactions.map {
+                        obj(
+                            "valor" to it.value,
+                            "tipo" to it.type.toString(),
+                            "descricao" to it.description,
+                            "realizada_em" to it.carriedOutAt.toString(),
+                        )
                     },
-                )
-                .encode(),
-        )
+            )
+        }
 }

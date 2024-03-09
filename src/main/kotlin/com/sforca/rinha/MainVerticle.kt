@@ -2,7 +2,7 @@ package com.sforca.rinha
 
 import com.sforca.rinha.core.GetStatementUseCase
 import com.sforca.rinha.core.SaveTransactionUseCase
-import com.sforca.rinha.http.ApiRouter
+import com.sforca.rinha.http.HttpServer
 import com.sforca.rinha.repository.client.ClientsRepository
 import com.sforca.rinha.repository.client.cache.RedisStatementCache
 import com.sforca.rinha.repository.client.cache.StatementCache
@@ -41,18 +41,7 @@ class MainVerticle : AbstractVerticle() {
         val statementCache: StatementCache = RedisStatementCache(clientsRepository, pool)
         val saveTransactionUseCase = SaveTransactionUseCase(statementCache, pool)
         val getStatementUseCase = GetStatementUseCase(statementCache)
-        val apiRouter = ApiRouter(vertx, saveTransactionUseCase, getStatementUseCase).router()
         val port = 8080
-        vertx
-            .createHttpServer()
-            .requestHandler(apiRouter)
-            .listen(port) { http ->
-                if (http.succeeded()) {
-                    startPromise.complete()
-                    println("HTTP server started on port $port")
-                } else {
-                    startPromise.fail(http.cause())
-                }
-            }
+        HttpServer(vertx, saveTransactionUseCase, getStatementUseCase).start(startPromise, port)
     }
 }

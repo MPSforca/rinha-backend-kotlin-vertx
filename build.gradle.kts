@@ -37,7 +37,7 @@ dependencies {
 
     // Web
     implementation("io.vertx:vertx-web")
-    implementation("io.vertx:vertx-web-validation")
+    implementation("io.vertx:vertx-web-openapi")
 
     // Postgres
     implementation("com.ongres.scram:client:2.1")

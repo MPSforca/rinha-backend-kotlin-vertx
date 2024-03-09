@@ -6,36 +6,48 @@ import com.sforca.rinha.core.exception.ClientIdNotFoundException
 import com.sforca.rinha.core.exception.InconsistentTransactionValueException
 import com.sforca.rinha.http.handler.StatementHandler
 import com.sforca.rinha.http.handler.TransactionHandler
-import com.sforca.rinha.http.validation.StatementValidationHandler
-import com.sforca.rinha.http.validation.TransactionValidationHandler
+import io.vertx.core.Future
+import io.vertx.core.Promise
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.openapi.RouterBuilder
 import io.vertx.ext.web.validation.BodyProcessorException
 import io.vertx.json.schema.ValidationException
 
-class ApiRouter(
+class HttpServer(
     private val vertx: Vertx,
     saveTransactionUseCase: SaveTransactionUseCase,
     getStatementUseCase: GetStatementUseCase,
 ) {
-    private val transactionValidationHandler = TransactionValidationHandler(vertx)
     private val transactionHandler = TransactionHandler(saveTransactionUseCase)
 
-    private val statementValidationHandler = StatementValidationHandler(vertx)
     private val statementHandler = StatementHandler(getStatementUseCase)
 
-    fun router(): Router =
-        Router.router(vertx).also {
-            it.mapSaveTransactionEndpoint()
-            it.mapGetStatementEndpoint()
-        }
+    fun start(
+        startPromise: Promise<Void>,
+        port: Int,
+    ): Future<RouterBuilder> =
+        RouterBuilder.create(vertx, "openapi/specs.yaml")
+            .onSuccess {
+                it.saveTransactionOperation()
+                it.getStatementOperation()
+                vertx.createHttpServer()
+                    .requestHandler(it.createRouter())
+                    .listen(port) { http ->
+                        if (http.succeeded()) {
+                            startPromise.complete()
+                            println("HTTP server started on port $port")
+                        } else {
+                            startPromise.fail(http.cause())
+                        }
+                    }
+            }
+            .onFailure {
+                println("Failed to create router from Open API: $it")
+            }
 
-    private fun Router.mapSaveTransactionEndpoint() {
-        this.post("/clientes/:id/transacoes")
-            .handler(BodyHandler.create())
-            .handler(transactionValidationHandler.saveRequestValidationHandler())
+    private fun RouterBuilder.saveTransactionOperation() =
+        operation("saveTransaction")
             .handler(transactionHandler::save)
             .failureHandler {
                 val throwable = it.failure()
@@ -55,11 +67,9 @@ class ApiRouter(
                     .putHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                     .end(JsonObject().put("error", throwable.message).encode())
             }
-    }
 
-    private fun Router.mapGetStatementEndpoint() {
-        this.get("/clientes/:id/extrato")
-            .handler(statementValidationHandler.getRequestValidationHandler())
+    private fun RouterBuilder.getStatementOperation() =
+        operation("getStatement")
             .handler(statementHandler::get)
             .failureHandler {
                 val throwable = it.failure()
@@ -74,5 +84,4 @@ class ApiRouter(
                     .putHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
                     .end(JsonObject().put("error", throwable.message).encode())
             }
-    }
 }
