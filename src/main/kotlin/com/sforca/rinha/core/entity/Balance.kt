@@ -1,4 +1,4 @@
-package com.sforca.rinha.repository.client
+package com.sforca.rinha.core.entity
 
 data class Balance(
     val value: Long,

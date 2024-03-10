@@ -16,7 +16,7 @@ services:
       resources:
         limits:
           cpus: "0.4"
-          memory: "90MB"
+          memory: "86MB"
 
   api01: &api
     image: app-rinha:latest
@@ -31,8 +31,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.45"
-          memory: "223MB"
+          cpus: "0.35"
+          memory: "205MB"
 
   api02:
     <<: *api
@@ -41,8 +41,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.45"
-          memory: "223MB"
+          cpus: "0.35"
+          memory: "205MB"
 
   nginx:
     image: nginx:latest
@@ -56,5 +56,30 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.2"
+          cpus: "0.15"
           memory: "14MB"
+
+  redis:
+    image: redis:7.2.4
+    restart: no
+    ports:
+      - "6379:6379"
+    command: redis-server --loglevel warning --requirepass password
+    deploy:
+      resources:
+        limits:
+          cpus: "0.05"
+          memory: "16MB"
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: no
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "24MB"

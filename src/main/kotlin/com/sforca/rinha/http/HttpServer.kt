@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.openapi.RouterBuilder
 import io.vertx.ext.web.validation.BodyProcessorException
 import io.vertx.json.schema.ValidationException
+import io.vertx.micrometer.PrometheusScrapingHandler
 
 class HttpServer(
     private val vertx: Vertx,
@@ -31,8 +32,10 @@ class HttpServer(
             .onSuccess {
                 it.saveTransactionOperation()
                 it.getStatementOperation()
+                val router = it.createRouter()
+                router.route("/metrics").handler(PrometheusScrapingHandler.create())
                 vertx.createHttpServer()
-                    .requestHandler(it.createRouter())
+                    .requestHandler(router)
                     .listen(port) { http ->
                         if (http.succeeded()) {
                             startPromise.complete()

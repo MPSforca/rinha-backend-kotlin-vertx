@@ -46,6 +46,10 @@ dependencies {
     // Cache
     implementation("io.vertx:vertx-redis-client")
 
+    // Monitoring
+    implementation("io.vertx:vertx-micrometer-metrics")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.12.3")
+
     implementation(kotlin("stdlib-jdk8"))
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")

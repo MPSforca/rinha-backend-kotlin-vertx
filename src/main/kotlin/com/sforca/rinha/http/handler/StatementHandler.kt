@@ -1,7 +1,7 @@
 package com.sforca.rinha.http.handler
 
 import com.sforca.rinha.core.GetStatementUseCase
-import com.sforca.rinha.core.output.GetStatementOutput
+import com.sforca.rinha.core.entity.Statement
 import com.sforca.rinha.http.APPLICATION_JSON
 import com.sforca.rinha.http.CONTENT_TYPE_HEADER
 import io.vertx.core.Future
@@ -13,26 +13,24 @@ import io.vertx.kotlin.core.json.obj
 class StatementHandler(
     private val getStatement: GetStatementUseCase,
 ) {
-    fun get(rc: RoutingContext): Future<GetStatementOutput> =
-        getStatement(clientId = rc.pathParam("id").toLong())
-            .onSuccess { getStatementSuccessResponse(rc, it) }
+    fun get(rc: RoutingContext): Future<Statement> =
+        getStatement(input = rc.pathParam("id").toLong())
+            .onSuccess { it.toSuccessResponse(rc) }
             .onFailure { rc.fail(it) }
 
-    private fun getStatementSuccessResponse(
-        rc: RoutingContext,
-        output: GetStatementOutput,
-    ) = rc.response()
-        .setStatusCode(200)
-        .putHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
-        .end(output.toJson().encode())
+    private fun Statement.toSuccessResponse(rc: RoutingContext) =
+        rc.response()
+            .setStatusCode(200)
+            .putHeader(CONTENT_TYPE_HEADER, APPLICATION_JSON)
+            .end(this.toJson().encode())
 
-    private fun GetStatementOutput.toJson(): JsonObject =
+    private fun Statement.toJson(): JsonObject =
         json {
             obj(
                 "saldo" to
                     obj(
                         "total" to balance.value,
-                        "data_extrato" to checkDate.toString(),
+                        "data_extrato" to balance.checkDate.toString(),
                         "limite" to balance.limit,
                     ),
                 "ultimas_transacoes" to

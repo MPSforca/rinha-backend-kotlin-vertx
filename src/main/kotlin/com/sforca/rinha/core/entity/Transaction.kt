@@ -1,8 +1,8 @@
-package com.sforca.rinha.core.output
+package com.sforca.rinha.core.entity
 
 import java.time.LocalDateTime
 
-data class TransactionOutput(
+data class Transaction(
     val clientId: Long,
     val value: Long,
     val type: Char,
